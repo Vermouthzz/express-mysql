@@ -38,4 +38,6 @@ app/
 config.development.js
 adapter.development.js
 
+test.js
+
 package-lock.json
