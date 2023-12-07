@@ -40,4 +40,6 @@ adapter.development.js
 
 test.js
 
+config/db.config.js
+
 package-lock.json

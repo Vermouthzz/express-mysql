@@ -16,16 +16,17 @@ const userServices = {
     })
   },
   getUserInfo: (req, res) => {
-    let user_id = req.user_id || 1
+    // const user_id = req.userinfo.id
+    const user_id = 1
     let arr = []
     let balance = null
     let card = []
     let sql = 'select * from user_ticket where user_id = ?'
     db.executeQuery(sql, [user_id]).then(data => {
-      let sql = 'select * from red_tickets where ticket_id = ?'
       let promise = []
-      arr = data
-      data.forEach(item => {
+      let sql = 'select * from red_tickets where ticket_id = ?'
+      arr = data.filter(item => item.ticket_status == 0)
+      arr.forEach(item => {
         promise.push(db.executeQuery(sql, [item.ticket_id]))
       })
       return Promise.all(promise)
@@ -52,11 +53,11 @@ const userServices = {
             card_num: data[0].h_card,
             card_sign: 0
           }
-          card.push(li_card,h_card)
+          card.push(li_card, h_card)
           let sql = 'select * from card_change where card_id = ?'
-          db.executeQuery(sql,[data[0].card_id]).then(data => {
+          db.executeQuery(sql, [data[0].card_id]).then(data => {
             data.forEach(item => {
-              if(item.change_obj == 1) {
+              if (item.change_obj == 1) {
                 item['change_obj'] = '礼品卡'
                 card[0].children ? card[0].children.push(item) : card[0].children = [item]
               } else {
