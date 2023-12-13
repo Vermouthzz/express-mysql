@@ -74,6 +74,26 @@ const userServices = {
         })
       })
     })
+  },
+  verifyPayWord: (req, res) => {
+    const user_id = req.userinfo.id
+    const { pwd } = req.body
+    console.log(req.body);
+    console.log(pwd);
+    let sql = 'select pay_word from user where id = ?'
+    db.executeQuery(sql, [user_id]).then(data => {
+      if (data[0].pay_word == pwd) {
+        res.status(200).json({
+          msg: '校验成功',
+          code: 200
+        })
+      } else {
+        res.status(401).json({
+          msg: '校验失败',
+          code: 401
+        })
+      }
+    })
   }
 }
 

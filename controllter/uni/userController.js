@@ -6,6 +6,9 @@ const userController = {
   },
   getUserInfos: (req,res) => {
     userServices.getUserInfo(req,res)
+  },
+  verify: (req, res) => {
+    userServices.verifyPayWord(req, res)
   }
 }
 

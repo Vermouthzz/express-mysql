@@ -17,14 +17,9 @@ const goodsServices = {
       } else {
         Object.assign(result[0], { goods_desc, goods_albums })
       }
-      let s_sql = 'select * from goods_argument where goods_id = ?'
-      db.executeQuery(s_sql, ['10005']).then(argData => {
-        for (let k in argData[0]) {
-          if (argData[0][k] == null || argData[0][k] == "") {
-            delete argData[0][k]
-          }
-        }
-        result[0].arguments = Renames(argData[0], 'arg')
+      let s_sql = 'select parameter_name,parameter_value from goods_argument where goods_id = ?'
+      db.executeQuery(s_sql, ['10126']).then(argData => {
+        result[0].attrList = argData
         let b_sql = 'select * from brand where brand_id = ?'
         db.executeQuery(b_sql, [brand_id]).then(brandData => {
           result[0].brand_info = brandData[0]

@@ -5,7 +5,8 @@ const Renames = (item,type = 'guige') => {
     season: '季节',
     opcity: '容量',
     color: '颜色',
-    favour: '口味'
+    favour: '口味',
+    size: '尺码'
   }
   const Enums = {
     function: '功能',
@@ -22,13 +23,14 @@ const Renames = (item,type = 'guige') => {
     delete item['goods_id']
     delete item['argument_id']
   }
+  type === 'arg' ? obj = Enums : obj = Enum
   for (let key in item) {
-    type === 'arg' ? obj = Enums : obj = Enum
+    console.log(key);
     for (let k in obj) {
       if (k == key) {
         //更换属性名
         let newName = obj[k]
-        let oldName = key
+        let oldName = key;
         Object.defineProperty(item, newName, Object.getOwnPropertyDescriptor(item, oldName))
         delete item[oldName]
       }

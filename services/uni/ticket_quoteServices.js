@@ -72,7 +72,7 @@ cron.schedule('* * * * *', () => {
       if (item.sign == 0) {
         if (now > delay_time && now < eff_time) {
           let s = 'update  `user_ticket` set sign = ? where user_ticket_id = ?'
-          Promise.push(db.executeQuery(s, [1, item.user_ticket_id]))
+          promise.push(db.executeQuery(s, [1, item.user_ticket_id]))
         }
       }
       if (now > eff_time) {

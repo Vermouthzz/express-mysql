@@ -3,7 +3,7 @@ const auth = require('../../utils/auth')
 
 const loginServices = {
   login: ({ account, password }, res) => {
-    let sql = 'select account,password,id from user where account = ?'
+    let sql = 'select account,password,id,pay_word from user where account = ?'
     db.query(sql, [account], (err, result) => {
       if (result.length === 0) {
         res.json({
@@ -17,10 +17,16 @@ const loginServices = {
             msg: '密码错误'
           })
         } else {
+          if (result[0].pay_word != null) {
+            result[0].has_payword = true
+          } else {
+            result[0].has_payword = false
+          }
+          delete result[0].pay_word
+          delete result[0].password
           let ids = result[0].id
           let sqls = 'select * from userinfo where u_id = ?'
           const token = auth.generateToken({ id: ids })
-          console.log(token);
           db.query(sqls, [ids], (err, results) => {
             let res1 = Object.assign(result[0], results[0])
             res1.token = token
