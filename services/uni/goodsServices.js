@@ -1,5 +1,4 @@
 const db = require('../../config/db.config')
-const { ReCommon, Renames } = require('../../hooks/sku')
 const { reServices } = require('../../hooks/goods')
 const goodsServices = {
   getGoodsInfo: (req, res) => {
