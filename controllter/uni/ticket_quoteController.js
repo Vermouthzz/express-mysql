@@ -6,6 +6,9 @@ const ticket_quoteController = {
   },
   updateTicketStatus: (req, res) => {
     ticket_quoteServices.updateStatusAPI(req, res)
+  },
+  getExchangeTickets: (req, res) => {
+    ticket_quoteServices.getExchangeTicketAPI(req, res)
   }
 }
 

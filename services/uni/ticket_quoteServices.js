@@ -50,6 +50,19 @@ const ticket_quoteServices = {
         data: arr,
       })
     })
+  },
+  getExchangeTicketAPI: async (req, res) => {
+    try {
+      let sql = 'select * from red_tickets where is_exchange = ?'
+      const data = await db.executeQuery(sql, [1])
+
+      res.status(200).json({
+        result: data,
+        msg: 'success'
+      })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
   }
 }
 

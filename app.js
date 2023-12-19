@@ -32,6 +32,7 @@ const commentRouter = require('./routes/uni/comment');
 const searchRouter = require('./routes/uni/search');
 const cardRouter = require('./routes/uni/card');
 const ticket_quoteRouter = require('./routes/uni/ticket_quote');
+const integralRouter = require('./routes/uni/integral');
 
 const upload = multer({ dest: './public/upload' })
 app.use(upload.any())
@@ -55,6 +56,8 @@ app.use('/api', ticket_quoteRouter)
 
 app.use('/api/*', auth.verifyToken)
 
+
+app.use('/api', integralRouter)
 app.use('/api', cardRouter)
 app.use('/api', cartRouter)
 app.use('/api', listRouter)
