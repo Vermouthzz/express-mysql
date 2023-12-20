@@ -7,13 +7,21 @@ const homeServices = {
       let sql = 'select goods_id,retail_price,goods_name,goods_img,goods_price from goods order by rand()'
       db.executeQuery(sql).then(result => {
         data = result
-        res.send(data.slice(0, 10))
+        res.status(200).json({
+          msg: 'success',
+          leftData: data.slice(0, 5),
+          rightData: data.slice(5, 11)
+        })
       })
     } else {
       let firstIndex = (page - 1) * pageSize
       let lastIndex = page * pageSize - 1
       let result = data.slice(firstIndex, lastIndex)
-      res.send(result)
+      res.status(200).json({
+        msg: 'success',
+        leftData: result.slice(0, 5),
+        rightData: result.slice(5, 10)
+      })
     }
   }
 }

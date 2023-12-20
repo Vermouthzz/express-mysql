@@ -2,14 +2,16 @@ const db = require('../../config/db.config')
 const cron = require('node-cron')
 
 const ticket_quoteServices = {
-  updateStatusAPI: (req, res) => {
-    let sql = 'update user_ticket set ticket_status = ? where user_ticket_id = ?'
-    db.executeQuery(sql, [2, id]).then(data => {
-      // if(data)
+  updateStatusAPI: async (req, res) => {
+    try {
+      let sql = 'update user_ticket set ticket_status = ? where user_ticket_id = ?'
+      await db.executeQuery(sql, [2, id])
       res.status(200).json({
         msg: '使用成功'
       })
-    })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
   },
   getTicketListAPI: (req, res) => {
     let arr = []
@@ -51,13 +53,42 @@ const ticket_quoteServices = {
       })
     })
   },
+  // 获取可兑换红包list
   getExchangeTicketAPI: async (req, res) => {
     try {
-      let sql = 'select * from red_tickets where is_exchange = ?'
-      const data = await db.executeQuery(sql, [1])
-
+      let sql = 'select * from red_tickets where is_exchange > ? order by is_exchange'
+      const data = await db.executeQuery(sql, [0])
       res.status(200).json({
         result: data,
+        msg: 'success'
+      })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
+  },
+  // 点击兑换红包逻辑
+  onExchangeRedTicketAPI: async (req, res) => {
+    const user_id = req.userinfo.id
+    const {id,status,get_time} = req.body
+    try {
+      const out_time = Number(get_time) + 1000 * 60 * 60 * 24 * 7
+      let sql = 'insert into user_ticket(user_id,ticket_id,ticket_status,get_time,out_time) values(?,?,?,?,?)'
+      await db.executeQuery(sql,[user_id,id,status,get_time,out_time])
+      res.status(200).json({
+        msg: '兑换成功'
+      })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
+  },
+  //获取可兑换红包信息
+  getTicketAPI: async (req, res) => {
+    const { id } = req.query
+    try {
+      let sql = 'select * from red_tickets where ticket_id = ?'
+      const data = await db.executeQuery(sql, [id])
+      res.status(200).json({
+        result: data[0],
         msg: 'success'
       })
     } catch (error) {

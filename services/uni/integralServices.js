@@ -30,12 +30,17 @@ const integralServices = {
     const user_id = req.userinfo.id
     try {
       let sql = 'select change_num,change_time,change_type from integral_change where user_id = ?'
+      let sql_ = 'select integral from userinfo where u_id = ?'
       const data = await db.executeQuery(sql, [user_id])
+      data.forEach(item => item.change_time = new Date(Number(item.change_time)).toLocaleString())
+      const integrals = await db.executeQuery(sql_, [user_id])
       res.status(200).json({
         result: data,
+        integral: integrals[0].integral,
         msg: 'success'
       })
     } catch (error) {
+      console.log(error);
       res.status(500).json({ success: false, message: 'Internal Server Error.' })
     }
   }

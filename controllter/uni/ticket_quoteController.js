@@ -9,6 +9,12 @@ const ticket_quoteController = {
   },
   getExchangeTickets: (req, res) => {
     ticket_quoteServices.getExchangeTicketAPI(req, res)
+  },
+  getTicket: (req, res) => {
+    ticket_quoteServices.getTicketAPI(req, res)
+  },
+  onExchangeRedTicket: (req, res) => {
+    ticket_quoteServices.onExchangeRedTicketAPI(req, res)
   }
 }
 

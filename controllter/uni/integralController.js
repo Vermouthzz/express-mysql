@@ -9,7 +9,7 @@ const integralController = {
   },
   getIntegralChange: (req, res) => {
     integralServices.getIntegralChangeAPI(req, res)
-  }
+  },
 }
 
 module.exports = integralController

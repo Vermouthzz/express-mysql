@@ -52,11 +52,11 @@ app.use('/api', categoryRouter)
 app.use('/api', homeRouter)
 app.use('/api', goodsRouter)
 app.use('/api', searchRouter)
-app.use('/api', ticket_quoteRouter)
+
 
 app.use('/api/*', auth.verifyToken)
 
-
+app.use('/api', ticket_quoteRouter)
 app.use('/api', integralRouter)
 app.use('/api', cardRouter)
 app.use('/api', cartRouter)
