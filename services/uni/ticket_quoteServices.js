@@ -69,11 +69,11 @@ const ticket_quoteServices = {
   // 点击兑换红包逻辑
   onExchangeRedTicketAPI: async (req, res) => {
     const user_id = req.userinfo.id
-    const {id,status,get_time} = req.body
+    const { id, status, get_time } = req.body
     try {
       const out_time = Number(get_time) + 1000 * 60 * 60 * 24 * 7
       let sql = 'insert into user_ticket(user_id,ticket_id,ticket_status,get_time,out_time) values(?,?,?,?,?)'
-      await db.executeQuery(sql,[user_id,id,status,get_time,out_time])
+      await db.executeQuery(sql, [user_id, id, status, get_time, out_time])
       res.status(200).json({
         msg: '兑换成功'
       })

@@ -4,19 +4,12 @@ const cron = require('node-cron')
 
 const orderServices = {
   getOrderItem: (req, res) => {
-    // const user_id = req.userinfo.id
     const { id: order_id } = req.query
     let item = null
     let list = {}
     let sql = 'select * from `order` where order_id = ?'
     db.executeQuery(sql, [order_id]).then(data => {
       item = data[0]
-      // let promise = []
-      // let sql = 'select name,id from regions where id = ?'
-      // promise.push(db.executeQuery(sql, [item.province_id]))
-      // promise.push(db.executeQuery(sql, [item.city_id]))
-      // promise.push(db.executeQuery(sql, [item.district_id]))
-      // return Promise.all(promise)
       let arr = [
         { name: '支付方式', value: item.pay_mode },
         { name: '商品总价', value: item.all_price },
@@ -78,33 +71,27 @@ const orderServices = {
       })
     })
   },
-  createOrderService: (req, res) => {
-    let { cart, addres, fee, num } = req.body
-    let { name, contact, country_id, province_id, city_id, district_id, detail_adrs } = addres
-    const user_id = req.userinfo.id
-    let time = new Date()
-    let create_time = time.toLocaleString()
-    let e_time = new Date(time.setHours(time.getHours() + 1)).toLocaleString()
-    let order_id = '46' + Math.floor(Math.random() * (10000000))
-    let sql = 'insert into `order`(order_id,user_id,create_time,effective_time,order_status,adress_name,country_id,province_id,city_id,district_id,detail_adrs,contact,pay_mode,active_fee,pay_price)values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-    let sqlArr = [order_id, user_id, create_time, e_time, '0', name, country_id, province_id, city_id, district_id, detail_adrs, contact, '余额支付', fee, num]
-    db.executeQuery(sql, sqlArr).then(data => {
+  createOrderService: async (req, res) => {
+    try {
+      let { cart, addres, fee, num } = req.body
+      let { name, contact, country_id, province_id, city_id, district_id, detail_adrs } = addres
+      const user_id = req.userinfo.id
+      let time = new Date()
+      let create_time = time.toLocaleString()
+      let e_time = new Date(time.setHours(time.getHours() + 1)).toLocaleString()
+      let order_id = '46' + Math.floor(Math.random() * (10000000))
+      let sql = 'insert into `order`(order_id,user_id,create_time,effective_time,order_status,adress_name,country_id,province_id,city_id,district_id,detail_adrs,contact,pay_mode,active_fee,pay_price)values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+      let sqlArr = [order_id, user_id, create_time, e_time, '0', name, country_id, province_id, city_id, district_id, detail_adrs, contact, '余额支付', fee, num]
+      let promise = []
+      const data = await db.executeQuery(sql, sqlArr)
       if (data.affectedRows == 1) {
-        let sql = 'insert into order_goods(order_id,goods_id,sku_id) values(?,?,?)'
-        let promise = []
+        let sqls = 'insert into order_goods(order_id,goods_id,sku_id) values(?,?,?)'
         cart.flat().forEach(item => {
           let arr = [order_id, item.goods_id, item.sku_id]
-          promise.push(db.executeQuery(sql, arr))
-        })
-        return Promise.all(promise)
-      }
-    }).then((data, err) => {
-      if (err) {
-        res.json({
-          status: 500,
-          msg: '错误'
+          promise.push(db.executeQuery(sqls, arr))
         })
       }
+      await Promise.all(promise)
       res.json({
         status: 200,
         msg: '创建订单成功',
@@ -112,7 +99,10 @@ const orderServices = {
           id: order_id
         }
       })
-    })
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
   },
   delOrderItem: (req, res) => {
 
@@ -186,16 +176,17 @@ const orderServices = {
       })
     })
   },
-  updateOrderItem: (req, res) => {
+  updateOrderItem: async (req, res) => {
     const { type, id } = req.body
-    let sql = 'update set order_status = ? from `order` where order_id = ?'
-    db.executeQuery(sql, [type, id]).then(data => {
-      if (data[0].affectedRows == 1) {
-        res.json({
-          msg: 'ok'
-        })
-      }
-    })
+    try {
+      let sql = 'update `order` set order_status = ? where order_id = ?'
+      await db.executeQuery(sql, [type, id])
+      res.status(200).json({
+        msg: 'success'
+      })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
   }
 }
 
@@ -204,7 +195,7 @@ cron.schedule('* * * * *', () => {
   let expiredOrders = null
   let sql = 'select order_id,create_time,effective_time,order_status from `order` where order_status = 0'
   db.executeQuery(sql).then(data => {
-    if(data.length == 0) return
+    if (data.length == 0) return
     expiredOrders = data
     //更新订单状态为过期
     let promise = []

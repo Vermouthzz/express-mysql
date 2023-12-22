@@ -29,7 +29,7 @@ const integralServices = {
   getIntegralChangeAPI: async (req, res) => {
     const user_id = req.userinfo.id
     try {
-      let sql = 'select change_num,change_time,change_type from integral_change where user_id = ?'
+      let sql = 'select change_num,change_time,change_type from integral_change where user_id = ? order by change_time desc'
       let sql_ = 'select integral from userinfo where u_id = ?'
       const data = await db.executeQuery(sql, [user_id])
       data.forEach(item => item.change_time = new Date(Number(item.change_time)).toLocaleString())

@@ -15,9 +15,8 @@ const userServices = {
       }
     })
   },
-  getUserInfo: (req, res) => {
-    // const user_id = req.userinfo.id
-    const user_id = 1
+  getUserInfo: async (req, res) => {
+    const user_id = req.userinfo.id
     let arr = []
     let balance = null
     let card = []
@@ -68,7 +67,7 @@ const userServices = {
             res.json({
               tickets: arr,
               balance,
-              card
+              card,
             })
           })
         })
@@ -94,6 +93,22 @@ const userServices = {
         })
       }
     })
+  },
+  postUserMoneyAPI: async (req, res) => {
+    const user_id = req.userinfo.id
+    const { money, type, num } = req.body
+    try {
+      const time = new Date().getTime()
+      let sql = 'update balance set num = ? where user_id = ?'
+      await db.executeQuery(sql, [money, user_id])
+      let insertSql = 'insert into bala_change(change_time,change_type,change_nums,user_id) values(?,?,?,?)'
+      await db.executeQuery(insertSql, [time, type, num, user_id])
+      res.status(200).json({
+        msg: 'success'
+      })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
   }
 }
 

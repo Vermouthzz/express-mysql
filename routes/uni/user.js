@@ -9,5 +9,7 @@ Userrouter.get('/uni/user', userController.getUserInfos);
 
 Userrouter.post('/uni/verify', userController.verify)
 
+Userrouter.post('/uni/balance', userController.postUserMoney)
+
 
 module.exports = Userrouter;

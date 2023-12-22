@@ -9,6 +9,9 @@ const userController = {
   },
   verify: (req, res) => {
     userServices.verifyPayWord(req, res)
+  },
+  postUserMoney: (req, res) => {
+    userServices.postUserMoneyAPI(req, res)
   }
 }
 
