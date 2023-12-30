@@ -18,8 +18,17 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
+const ws = require('websocket')
+const WebSocketServer = ws.server
 
 var server = http.createServer(app);
+
+const wsServer = new WebSocketServer({
+  httpServer: server,
+  autoAcceptConnections: false
+})
+
+
 
 /**
  * Listen on provided port, on all network interfaces.

@@ -73,24 +73,22 @@ const orderServices = {
   },
   createOrderService: async (req, res) => {
     try {
-      let { cart, addres, fee, num } = req.body
+      let { cart, addres, fee, num, total } = req.body
       let { name, contact, country_id, province_id, city_id, district_id, detail_adrs } = addres
       const user_id = req.userinfo.id
       let time = new Date()
-      let create_time = time.toLocaleString()
-      let e_time = new Date(time.setHours(time.getHours() + 1)).toLocaleString()
+      let create_time = time.getTime()
+      let e_time = new Date(time.setHours(time.getHours() + 1)).getTime()
       let order_id = '46' + Math.floor(Math.random() * (10000000))
-      let sql = 'insert into `order`(order_id,user_id,create_time,effective_time,order_status,adress_name,country_id,province_id,city_id,district_id,detail_adrs,contact,pay_mode,active_fee,pay_price)values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-      let sqlArr = [order_id, user_id, create_time, e_time, '0', name, country_id, province_id, city_id, district_id, detail_adrs, contact, '余额支付', fee, num]
+      let sql = 'insert into `order`(order_id,user_id,create_time,effective_time,order_status,adress_name,country_id,province_id,city_id,district_id,detail_adrs,contact,pay_mode,active_fee,pay_price, all_price)values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+      let sqlArr = [order_id, user_id, create_time, e_time, '0', name, country_id, province_id, city_id, district_id, detail_adrs, contact, '余额支付', fee, num, total]
       let promise = []
-      const data = await db.executeQuery(sql, sqlArr)
-      if (data.affectedRows == 1) {
-        let sqls = 'insert into order_goods(order_id,goods_id,sku_id) values(?,?,?)'
-        cart.flat().forEach(item => {
-          let arr = [order_id, item.goods_id, item.sku_id]
-          promise.push(db.executeQuery(sqls, arr))
-        })
-      }
+      await db.executeQuery(sql, sqlArr)
+      let sqls = 'insert into order_goods(order_id,goods_id,sku_id, count) values(?,?,?,?)'
+      cart.flat().forEach(item => {
+        let arr = [order_id, item.goods_id, item.sku_id, item.count]
+        promise.push(db.executeQuery(sqls, arr))
+      })
       await Promise.all(promise)
       res.json({
         status: 200,

@@ -6,6 +6,9 @@ const cardController = {
   },
   getBalanceChange: (req, res) => {
     cardServices.getBalanceChangeList(req, res)
+  },
+  updateCardItem: (req, res) => {
+    cardServices.updateCardItemAPI(req, res)
   }
 }
 

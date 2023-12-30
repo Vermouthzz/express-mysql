@@ -23,6 +23,13 @@ const homeServices = {
         rightData: result.slice(5, 10)
       })
     }
+  },
+  getHomeNav: (req, res) => {
+    try {
+      let sql = 'select  from goods_category'
+    } catch (error) {
+      
+    }
   }
 }
 

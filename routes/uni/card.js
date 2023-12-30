@@ -5,5 +5,7 @@ const cardController = require('../../controllter/uni/cardController')
 //获取礼品卡、提货卡消费明细
 cardRouter.get('/uni/card/detail', cardController.getCardChange)
 
+cardRouter.get('/uni/card/change', cardController.updateCardItem)
+
 
 module.exports = cardRouter

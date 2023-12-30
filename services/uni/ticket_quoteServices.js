@@ -3,9 +3,10 @@ const cron = require('node-cron')
 
 const ticket_quoteServices = {
   updateStatusAPI: async (req, res) => {
+    const { status } = req.body
     try {
       let sql = 'update user_ticket set ticket_status = ? where user_ticket_id = ?'
-      await db.executeQuery(sql, [2, id])
+      await db.executeQuery(sql, [status, id])
       res.status(200).json({
         msg: '使用成功'
       })

@@ -13,6 +13,7 @@ const integralServices = {
   updateUserIntegralAPI: async (req, res) => {
     const user_id = req.userinfo.id
     const { date, count, sum, type } = req.body
+    console.log(date, count, sum);
     try {
       let sql = 'update userinfo set sign_date = ?,integral=? where u_id = ?'
       let sql_ = 'insert into integral_change(change_num,change_time,user_id,change_type) values(?,?,?,?)'
