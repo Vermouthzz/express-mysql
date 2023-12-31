@@ -1,19 +1,18 @@
 const db = require('../../config/db.config')
 
 const userServices = {
-  updateUserInfo: (req, res) => {
+  updateUserInfo: async (req, res) => {
     const { nickname, sign, birthday, gender, u_id } = req.body
-    console.log(nickname, sign, birthday, gender, u_id);
-    let updateSql = 'update userinfo set nickname=?,sign=?,birthday=?,gender=? where u_id=?'
-    db.query(updateSql, [nickname, sign, birthday, gender, u_id], (err, result) => {
-      console.log(result);
-      if (result.affectedRows === 1) {
-        res.json({
-          status: '200',
-          msg: '更新成功',
-        })
-      }
-    })
+    try {
+      let updateSql = 'update userinfo set nickname=?,sign=?,birthday=?,gender=? where u_id=?'
+      await db.executeQuery(updateSql, [nickname, sign, birthday, gender, u_id])
+
+      res.status(200).json({
+        msg: 'success'
+      })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
   },
   getUserInfo: async (req, res) => {
     const user_id = req.userinfo.id
@@ -106,6 +105,19 @@ const userServices = {
       res.status(200).json({
         msg: 'success'
       })
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
+  },
+  getUserChatRecordAPI: async (req, res) => {
+    const user_id = req.userinfo.id
+    try {
+      let sql = 'select message where send_id = ? order by chat_time desc'
+      const data = await db.executeQuery(sql, [user_id])
+      let sql_ = 'select message where receiver_id = ? order by chat_time desc'
+      const rData = await db.executeQuery(sql_, [user_id])
+
+
     } catch (error) {
       res.status(500).json({ success: false, message: 'Internal Server Error.' })
     }
