@@ -7,6 +7,7 @@ var logger = require('morgan');
 const auth = require('./utils/auth')
 const fs = require('fs')
 
+
 var indexRouter = require('./routes/index');
 var loginRouter = require('./routes/uni/login');
 const Userrouter = require('./routes/uni/user');
@@ -16,6 +17,7 @@ const goodsRouter = require('./routes/uni/goods');
 
 
 var app = express();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -34,6 +36,9 @@ const cardRouter = require('./routes/uni/card');
 const ticket_quoteRouter = require('./routes/uni/ticket_quote');
 const integralRouter = require('./routes/uni/integral');
 
+
+const a_goodsRouter = require('./routes/admin/goods')
+
 const upload = multer({ dest: './public/upload' })
 app.use(upload.any())
 app.use(express.static("./public"))
@@ -45,6 +50,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/api', a_goodsRouter)
 
 app.use('/', indexRouter);
 app.use('/api', loginRouter)
@@ -86,6 +93,7 @@ app.post('/api/uni/upload', (req, res) => {
     }
   })
 })
+
 
 
 
