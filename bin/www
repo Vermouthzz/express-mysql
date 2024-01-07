@@ -13,7 +13,7 @@ var http = require('http');
  */
 
 var port = normalizePort(process.env.PORT || '3000');
-const socketPort = '3001'
+
 app.set('port', port);
 
 /**
@@ -21,76 +21,14 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-const { Server } = require('socket.io')
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    method: ['GET', 'POST']
-  }
-})
-
-// 存储客服和用户信息
-const users = {}
-
-
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  // 处理用户连接
-  socket.on('user-connected', (username) => {
-    // 将用户加入用户列表
-    users[socket.id] = username;
-
-    // 发送欢迎消息给用户
-    io.to(socket.id).emit('chat-message', {
-      sender: 'System',
-      message: `Welcome, ${username}!`,
-    });
-
-    // 通知客服有新用户连接
-    io.emit('user-connected', username);
-  });
-
-  // 处理客服连接
-  socket.on('customer-service-connected', (customerServiceName) => {
-    // 发送欢迎消息给客服
-    io.to(socket.id).emit('chat-message', {
-      sender: 'System',
-      message: `Welcome, ${customerServiceName}!`,
-    });
-  });
-
-  // 处理聊天消息
-  socket.on('chat-message', (message) => {
-    // 广播消息给所有客服和用户
-    io.emit('chat-message', {
-      sender: users[socket.id],
-      message: message,
-    });
-  });
-
-  // 处理用户断开连接
-  socket.on('disconnect', () => {
-    const disconnectedUser = users[socket.id];
-    delete users[socket.id];
-
-    // 通知客服有用户断开连接
-    io.emit('user-disconnected', disconnectedUser);
-
-    console.log('A user disconnected');
-  });
-});
 
 
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-server.listen(socketPort, () => {
-  console.log(`Express server running on http://localhost:${socketPort}`);
-})
-app.listen(port, '0.0.0.0')
-// server.listen(port, '0.0.0.0');
+
+server.listen(port, '0.0.0.0');
 server.on('error', onError);
 server.on('listening', onListening);
 

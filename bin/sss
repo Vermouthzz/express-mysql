@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('uni-app-node:server');
+var http = require('http');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+var socketPort = normalizePort(process.env.PORT || '3001');
+
+app.set('port', socketPort);
+
+/**
+ * Create HTTP server.
+ */
+var server = http.createServer(app);
+const { Server } = require('socket.io')
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    method: ['GET', 'POST']
+  }
+})
+
+// 存储客服和用户信息
+const users = {}
+
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+
+  // 处理用户连接
+  socket.on('user-connected', (username) => {
+    // 将用户加入用户列表
+    users[socket.id] = username;
+
+    // 发送欢迎消息给用户
+    io.to(socket.id).emit('chat-message', {
+      sender: 'System',
+      message: `Welcome, ${username}!`,
+    });
+
+    // 通知客服有新用户连接
+    io.emit('user-connected', username);
+  });
+
+  // 处理客服连接
+  socket.on('customer-service-connected', (customerServiceName) => {
+    // 发送欢迎消息给客服
+    io.to(socket.id).emit('chat-message', {
+      sender: 'System',
+      message: `Welcome, ${customerServiceName}!`,
+    });
+  });
+
+  // 处理聊天消息
+  socket.on('chat-message', (message) => {
+    // 广播消息给所有客服和用户
+    io.emit('chat-message', {
+      sender: users[socket.id],
+      message: message,
+    });
+  });
+
+  // 处理用户断开连接
+  socket.on('disconnect', () => {
+    const disconnectedUser = users[socket.id];
+    delete users[socket.id];
+
+    // 通知客服有用户断开连接
+    io.emit('user-disconnected', disconnectedUser);
+
+    console.log('A user disconnected');
+  });
+});
+
+
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+server.listen(socketPort, '0.0.0.0', () => {
+  console.log(`Express server running on http://localhost:${socketPort}`);
+})
+
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string'
+    ? 'Pipe ' + port
+    : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+    ? 'pipe ' + addr
+    : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
