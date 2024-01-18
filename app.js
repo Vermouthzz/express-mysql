@@ -26,6 +26,8 @@ app.set('view engine', 'jade');
 //后端跨域cors
 const cors = require('cors');
 const multer = require('multer');
+
+//uni
 const cartRouter = require('./routes/uni/cart');
 const addressRouter = require('./routes/uni/address');
 const orderRouter = require('./routes/uni/order');
@@ -36,8 +38,11 @@ const cardRouter = require('./routes/uni/card');
 const ticket_quoteRouter = require('./routes/uni/ticket_quote');
 const integralRouter = require('./routes/uni/integral');
 
-
+//admin
 const a_goodsRouter = require('./routes/admin/goods')
+const a_loginRouter = require('./routes/admin/login')
+const a_chatRouter = require('./routes/admin/chat')
+const a_userRouter = require('./routes/admin/user')
 
 const upload = multer({ dest: './public/upload' })
 app.use(upload.any())
@@ -51,8 +56,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+//admin
 app.use('/api', a_goodsRouter)
+app.use('/api', a_loginRouter)
 
+//uni
 app.use('/', indexRouter);
 app.use('/api', loginRouter)
 app.use('/api', categoryRouter)
@@ -63,6 +71,7 @@ app.use('/api', searchRouter)
 
 app.use('/api/*', auth.verifyToken)
 
+//uni
 app.use('/api', ticket_quoteRouter)
 app.use('/api', integralRouter)
 app.use('/api', cardRouter)
@@ -73,6 +82,9 @@ app.use('/api', addressRouter)
 app.use('/api', Userrouter)
 app.use('/api', orderRouter)
 
+//admin
+app.use('/api', a_chatRouter)
+app.use('/api', a_userRouter)
 
 //file与小程序中的name参数要一致
 app.post('/api/uni/upload', (req, res) => {

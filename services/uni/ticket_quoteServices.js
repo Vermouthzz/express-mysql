@@ -14,45 +14,35 @@ const ticket_quoteServices = {
       res.status(500).json({ success: false, message: 'Internal Server Error.' })
     }
   },
-  getTicketListAPI: (req, res) => {
+  getTicketListAPI: async (req, res) => {
     let arr = []
     // const user_id = req.userinfo.id
+    const { type } = req.query
     const user_id = 1
-    let sql = 'select * from user_ticket where user_id = ?'
-    db.executeQuery(sql, [user_id]).then(data => {
+    try {
+      let sql = 'select * from user_ticket where user_id = ?'
+      const data = await db.executeQuery(sql, [user_id])
       let promise = []
-      let sql = 'select * from red_tickets where ticket_id = ?'
+      let sql_ = 'select * from red_tickets where ticket_id = ?'
       data.forEach(item => {
-        promise.push(db.executeQuery(sql, [item.ticket_id]))
+        promise.push(db.executeQuery(sql_, [item.ticket_id]))
       })
-      arr = data.reduce((a, b) => {
-        if (a[b.ticket_status]) {
-          a[b.ticket_status].value.push(b)
-        } else {
-          let obj = {
-            name: b.ticket_status == 0 ? '未使用' : b.ticket_status == 1 ? '已使用' : '已过期',
-            value: [b]
-          }
-          a[b.ticket_status] = obj
-        }
-        return a
-      }, [])
-
-      return Promise.all(promise)
-    }).then(data => {
+      arr = data
+      const list = await Promise.all(promise)
       arr.forEach(item => {
-        item.value.forEach(i => {
-          data.flat().forEach(subItem => {
-            if (i.ticket_id == subItem.ticket_id) {
-              Object.assign(i, subItem)
-            }
-          })
+        list.flat().forEach(lItem => {
+          if (lItem.ticket_id == item.ticket_id) {
+            Object.assign(item, lItem)
+          }
         })
       })
       res.status(200).json({
-        data: arr,
+        result: arr,
       })
-    })
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ success: false, message: 'Internal Server Error.' })
+    }
   },
   // 获取可兑换红包list
   getExchangeTicketAPI: async (req, res) => {

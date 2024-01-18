@@ -16,61 +16,45 @@ const userServices = {
   },
   getUserInfo: async (req, res) => {
     const user_id = req.userinfo.id
-    let arr = []
+    // const user_id = 1
     let balance = null
     let card = []
     let sql = 'select * from user_ticket where user_id = ?'
-    db.executeQuery(sql, [user_id]).then(data => {
-      let promise = []
-      let sql = 'select * from red_tickets where ticket_id = ?'
-      arr = data.filter(item => item.ticket_status == 0)
-      arr.forEach(item => {
-        promise.push(db.executeQuery(sql, [item.ticket_id]))
-      })
-      return Promise.all(promise)
-    }).then(data => {
-      arr.forEach(item => {
-        data.flat().forEach(subItem => {
-          if (item.ticket_id == subItem.ticket_id) {
-            Object.assign(item, subItem)
-          }
-        })
-      })
-      let sql = 'select * from balance where user_id = ?'
-      db.executeQuery(sql, [user_id]).then(data => {
-        balance = data[0]
-        let sql = 'select * from card where user_id = ?'
-        db.executeQuery(sql, [user_id]).then(data => {
-          let li_card = {
-            card_name: '礼品卡',
-            card_num: data[0].li_card,
-            card_sign: 1
-          }
-          let h_card = {
-            card_name: '提货卡',
-            card_num: data[0].h_card,
-            card_sign: 0
-          }
-          card.push(li_card, h_card)
-          let sql = 'select * from card_change where card_id = ?'
-          db.executeQuery(sql, [data[0].card_id]).then(data => {
-            data.forEach(item => {
-              if (item.change_obj == 1) {
-                item['change_obj'] = '礼品卡'
-                card[0].children ? card[0].children.push(item) : card[0].children = [item]
-              } else {
-                item['change_obj'] = '提货卡'
-                card[1].children ? card[1].children.push(item) : card[1].children = [item]
-              }
-            })
-            res.json({
-              tickets: arr,
-              balance,
-              card,
-            })
-          })
-        })
-      })
+    const data = await db.executeQuery(sql, [user_id])
+    const ticket = data.filter(i => i.ticket_status == 0)
+    const length = ticket.length //红包个数
+    let sql_ = 'select money from userinfo where user_id = ?'
+    const balanceData = await db.executeQuery(sql_, [user_id])
+    balance = balanceData[0]  //余额
+    let sqls = 'select * from card where user_id = ?'
+    const cardData = await db.executeQuery(sqls, [user_id])
+    let li_card = {
+      card_name: '礼品卡',
+      card_num: cardData[0].li_card,
+      card_sign: 1
+    }
+    let h_card = {
+      card_name: '提货卡',
+      card_num: cardData[0].h_card,
+      card_sign: 0
+    }
+    card.push(li_card, h_card)
+    let sql1 = 'select * from card_change where card_id = ?'
+    const cardInfo = await db.executeQuery(sql1, [cardData[0].card_id])
+    cardInfo.forEach(item => {
+      if (item.is_use == 0) {
+        if (item.change_obj == 1) {
+          item['change_obj'] = '礼品卡'
+          card[0].children ? card[0].children.push(item) : card[0].children = [item]
+        } else {
+          item['change_obj'] = '提货卡'
+          card[1].children ? card[1].children.push(item) : card[1].children = [item]
+        }
+      }
+    })
+    res.json({
+      balance,
+      card,
     })
   },
   verifyPayWord: (req, res) => {

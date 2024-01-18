@@ -20,7 +20,7 @@ const cardServices = {
       let promise = []
       let s = 'insert into card_change(card_id,change_num,change_type,change_obj,show_id,effective_time,is_use,order_id) values()'
       list.forEach(item => {
-        promise.push(db.executeQuery(s,[item.card_id,item.change_num,type,item.change_obj,item.show_id,item.effective_time,use,order_id]))
+        promise.push(db.executeQuery(s, [item.card_id, item.change_num, type, item.change_obj, item.show_id, item.effective_time, use, order_id]))
       })
       await Promise.all(promise)
       res.status(200).json({
@@ -56,6 +56,45 @@ const cardServices = {
         }))
       })
     })
+  },
+  //获取礼品卡,提货卡List
+  getCardListAPI: async (req, res) => {
+    const user_id = 1
+    const card = []
+    try {
+      let sqls = 'select * from card where user_id = ?'
+      const cardData = await db.executeQuery(sqls, [user_id])
+      let li_card = {
+        card_name: '礼品卡',
+        card_num: cardData[0].li_card,
+        card_sign: 1
+      }
+      let h_card = {
+        card_name: '提货卡',
+        card_num: cardData[0].h_card,
+        card_sign: 0
+      }
+      card.push(li_card, h_card)
+      let sql1 = 'select * from card_change where card_id = ?'
+      const cardInfo = await db.executeQuery(sql1, [cardData[0].card_id])
+      cardInfo.forEach(item => {
+        if (item.is_use == 0) {
+          if (item.change_obj == 1) {
+            item['change_obj'] = '礼品卡'
+            card[0].children ? card[0].children.push(item) : card[0].children = [item]
+          } else {
+            item['change_obj'] = '提货卡'
+            card[1].children ? card[1].children.push(item) : card[1].children = [item]
+          }
+        }
+      })
+      res.status(200).json({
+        msg: 'success',
+        result: card
+      })
+    } catch (error) {
+
+    }
   }
 }
 

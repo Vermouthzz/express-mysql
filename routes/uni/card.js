@@ -7,5 +7,7 @@ cardRouter.get('/uni/card/detail', cardController.getCardChange)
 
 cardRouter.get('/uni/card/change', cardController.updateCardItem)
 
+cardRouter.get('/uni/card', cardController.getCardList)
+
 
 module.exports = cardRouter
