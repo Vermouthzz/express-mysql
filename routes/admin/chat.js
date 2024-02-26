@@ -6,4 +6,6 @@ chatRouter.get('/admin/chatinfo', chatController.getChatInfo)
 
 chatRouter.get('/admin/chat', chatController.getUserChat)
 
+chatRouter.post('/admin/chat', chatController.insertUserChatInfo)
+
 module.exports = chatRouter

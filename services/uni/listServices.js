@@ -4,6 +4,7 @@ const { Renames, ReCommon } = require('../../hooks/sku')
 const { reServices } = require('../../hooks/goods')
 let loveList = []
 const listServices = {
+  //获取主页猜你喜欢商品
   getLoveList: (req, res) => {
     let { page, pageSize } = req.query
     let start = (page - 1) * pageSize
@@ -41,23 +42,17 @@ const listServices = {
         return Promise.all(promise)
       }).then(data => {
         loveList = data.flat()
-        res.json({
-          status: 200,
-          msg: '查询成功',
-          data: loveList.slice(start, end)
-        })
-      })
-    } else {
-      res.json({
-        status: 200,
-        msg: '查询成功',
-        data: loveList.slice(start, end)
+
       })
     }
+    res.json({
+      status: 200,
+      msg: '查询成功',
+      data: loveList.slice(start, end)
+    })
   },
   getSkuList: (req, res) => {
     let { goods_id } = req.query
-    let user_id = 1
     let arr = []
     let spec = []
     let service = ''
@@ -107,6 +102,32 @@ const listServices = {
         })
       })
     })
+  },
+  //获取订单详情页的推荐商品
+  getOrderRecommendListAPI: async (req, res) => {
+    const { order_id } = req.query
+    try {
+      let o_sql = 'select goods_id from order_goods where order_id = ?'
+      const [{ goods_id }] = await db.executeQuery(o_sql, [order_id])
+      let sql = 'select DISTINCT goods_id from order_goods where goods_id != ? ORDER BY RAND()'
+      const ids = await db.executeQuery(sql, [goods_id])
+
+      const arr = ids.slice(0, 8)
+      let sql_ = 'select goods_id,goods_name,goods_img,goods_price,retail_price from goods where goods_id =?'
+
+      let promise = []
+      arr.forEach(item => {
+        promise.push(db.executeQuery(sql_, [item.goods_id]))
+      })
+      const goodsData = await Promise.all(promise)
+
+      res.status(200).json({
+        msg: 'success',
+        result: goodsData.flat()
+      })
+    } catch (error) {
+
+    }
   },
 }
 module.exports = listServices

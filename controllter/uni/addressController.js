@@ -2,7 +2,7 @@ const addressServices = require('../../services/uni/addressServices')
 
 const addressController = {
   getRegion: (req, res) => {
-    addressServices.getRegionList(req, res)
+    addressServices.getRegionAPI(req, res)
   },
   getRegionChild: (req, res) => {
     addressServices.getRegionChild(req, res)

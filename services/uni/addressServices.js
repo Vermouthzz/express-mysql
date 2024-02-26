@@ -51,6 +51,23 @@ const addressServices = {
       res.send(arr)
     })
   },
+  getRegionAPI: async (req, res) => {
+    const { id } = req.query
+    let arr = []
+    let sql = 'select name,id,parent_id from regions where parent_id = ?'
+    const data = await db.executeQuery(sql, [id])
+    data.forEach(item => {
+      let obj = {
+        text: item.name,
+        value: item.id,
+        children: []
+      }
+      arr.push(obj)
+    })
+    res.json({
+      result: arr
+    })
+  },
   getAddressList: (req, res) => {
     const user_id = req.userinfo.id
     let arr = []
@@ -91,7 +108,7 @@ const addressServices = {
   },
   updateAddressList: (req, res) => {
     const user_id = req.userinfo.id
-    const { id:addres_id } = req.body
+    const { id: addres_id } = req.body
     let s = 'select addres_id from address where user_id = ?'
     db.executeQuery(s, [user_id]).then(data => {
       let sql = 'update address set is_selected = ? where addres_id = ?'

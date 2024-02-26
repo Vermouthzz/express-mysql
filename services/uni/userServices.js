@@ -16,16 +16,15 @@ const userServices = {
   },
   getUserInfo: async (req, res) => {
     const user_id = req.userinfo.id
-    // const user_id = 1
     let balance = null
     let card = []
     let sql = 'select * from user_ticket where user_id = ?'
     const data = await db.executeQuery(sql, [user_id])
     const ticket = data.filter(i => i.ticket_status == 0)
     const length = ticket.length //红包个数
-    let sql_ = 'select money from userinfo where user_id = ?'
+    let sql_ = 'select money from userinfo where u_id = ?'
     const balanceData = await db.executeQuery(sql_, [user_id])
-    balance = balanceData[0]  //余额
+    balance = balanceData[0].money  //余额
     let sqls = 'select * from card where user_id = ?'
     const cardData = await db.executeQuery(sqls, [user_id])
     let li_card = {
@@ -60,8 +59,6 @@ const userServices = {
   verifyPayWord: (req, res) => {
     const user_id = req.userinfo.id
     const { pwd } = req.body
-    console.log(req.body);
-    console.log(pwd);
     let sql = 'select pay_word from user where id = ?'
     db.executeQuery(sql, [user_id]).then(data => {
       if (data[0].pay_word == pwd) {
@@ -82,8 +79,9 @@ const userServices = {
     const { money, type, num } = req.body
     try {
       const time = new Date().getTime()
-      let sql = 'update balance set num = ? where user_id = ?'
-      await db.executeQuery(sql, [money, user_id])
+      const ba = money - num
+      let sql = 'update userinfo set money = ? where u_id = ?'
+      await db.executeQuery(sql, [ba, user_id])
       let insertSql = 'insert into bala_change(change_time,change_type,change_nums,user_id) values(?,?,?,?)'
       await db.executeQuery(insertSql, [time, type, num, user_id])
       res.status(200).json({
@@ -93,19 +91,6 @@ const userServices = {
       res.status(500).json({ success: false, message: 'Internal Server Error.' })
     }
   },
-  getUserChatRecordAPI: async (req, res) => {
-    const user_id = req.userinfo.id
-    try {
-      let sql = 'select message where send_id = ? order by chat_time desc'
-      const data = await db.executeQuery(sql, [user_id])
-      let sql_ = 'select message where receiver_id = ? order by chat_time desc'
-      const rData = await db.executeQuery(sql_, [user_id])
-
-
-    } catch (error) {
-      res.status(500).json({ success: false, message: 'Internal Server Error.' })
-    }
-  }
 }
 
 module.exports = userServices

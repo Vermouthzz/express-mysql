@@ -15,6 +15,9 @@ const orderController = {
   },
   updateOrderItem: (req, res) => {
     orderServices.updateOrderItem(req, res)
+  },
+  getCreateOrder: (req, res) => {
+    orderServices.getCreateOrderItem(req, res)
   }
 }
 

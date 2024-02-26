@@ -3,9 +3,14 @@ const { reServices } = require('../../hooks/goods')
 const { nanoid } = require('nanoid')
 const _ = require('lodash')
 const { Renames, reFee } = require('../../hooks/sku')
+
+const { shuffleArray } = require('../../hooks/shuffle')
+
+let List = []
+
 const cartServices = {
   getCartList: (req, res) => {
-    let { user_id } = req.query
+    const user_id = req.userinfo.id
     let arr = []
     let sql = 'select id from cart where user_id = ?'
     db.executeQuery(sql, [user_id]).then(data => {
@@ -38,7 +43,6 @@ const cartServices = {
         let promise = []
         data.flat().forEach(i => {
           i.services = reServices(i.services)
-          // i.goods_fee = reServices(i.goods_fee, 'f')
         })
         arr.forEach(item => {
           data.flat().forEach(i => {
@@ -90,7 +94,7 @@ const cartServices = {
     let sql = 'select id from cart where user_id = ?'
     db.executeQuery(sql, [user_id]).then(data => {
       let sql = 'insert into cartitem(item_id,sku_id,count,goods_id,is_selected,cart_id) values(?,?,?,?,?,?)'
-      db.executeQuery(sql, [id, sku_id, count, goods_id, checked,data[0].id]).then(data => {
+      db.executeQuery(sql, [id, sku_id, count, goods_id, checked, data[0].id]).then(data => {
         if (data.affectedRows == 1) {
           if (data.affectedRows == 1) {
             res.json({
@@ -103,7 +107,6 @@ const cartServices = {
     })
   },
   delCartList: (req, res) => {
-    // let { id } = req.query
     let { id } = req.body
     let sql = 'DELETE FROM cartitem WHERE item_id = ?'
     db.executeQuery(sql, [id]).then(result => {
@@ -149,7 +152,56 @@ const cartServices = {
         })
       })
     }
-  }
+  },
+  //获取购物车推荐商品
+  getRecommendListAPI: async (req, res) => {
+    const user_id = req.userinfo.id
+    const { pageNum, pageSize } = req.query
+    try {
+      const start = (pageNum - 1) * pageSize
+      const end = start + pageSize * 1
+      if (pageNum == 1) {
+        //查询商品信息
+        const sql = 'select goods_id, goods_name, goods_img, goods_price, retail_price from goods where category_id = ? order by rand()'
+        //查询相关商品
+        const limit = 24
+        const cart_sql = 'select id from cart where user_id = ?'
+        const [{ id }] = await db.executeQuery(cart_sql, [user_id])
+
+        const cart_sqls = 'select goods_id from cartitem where cart_id = ?'
+        const ids = await db.executeQuery(cart_sqls, [id])
+
+        const ca_sql = 'select category_id from goods where goods_id = ?'
+        let promise = []
+        ids.forEach(item => promise.push(db.executeQuery(ca_sql, [item.goods_id])))
+        const ca_ids = await Promise.all(promise)
+
+        const ca_sqls = 'select parent_id from goods_category where category_id = ?'
+        let promises = []
+        ca_ids.flat().forEach(item => promises.push(db.executeQuery(ca_sqls, [item.category_id])))
+        const category_ids = await Promise.all(promises)
+
+        const sql_ = 'select category_id from goods_category where parent_id = ?'
+        let p = []
+        category_ids.flat().forEach(item => p.push(db.executeQuery(sql_, [item.parent_id])))
+        const cateIds = await Promise.all(p)
+
+        let goodsP = []
+        cateIds.flat().forEach(item => {
+          goodsP.push(db.executeQuery(sql, [item.category_id]))
+        })
+        const data = await Promise.all(goodsP)
+        List = shuffleArray(data.flat())
+      }
+
+      res.status(200).json({
+        msg: 'success',
+        result: List.slice(start, end)
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  },
 }
 // const updateMap = new Map([
 //   [1, 'update cartitem set count = ? where item_id = ?'],

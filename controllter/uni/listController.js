@@ -6,6 +6,9 @@ const listController = {
   },
   getSku: (req, res) => {
     listServices.getSkuList(req, res)
+  },
+  getOrderRecommendList: (req, res) => {
+    listServices.getOrderRecommendListAPI(req, res)
   }
 }
 

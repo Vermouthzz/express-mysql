@@ -4,10 +4,12 @@ const goodsServices = {
   getGoodsInfo: async (req, res) => {
     const { id } = req.query
     try {
+      const limit = 24
       // 查询商品信息
       let sql = 'select * from goods where goods_id = ?'
       let brand_id = null
       const result = await db.executeQuery(sql, [id])
+      const category_id = result[0].category_id
       brand_id = result[0].brand_id
       let goods_desc = result[0].goods_desc.split('.')
       let goods_albums = result[0].goods_albums.split(',')
@@ -29,13 +31,12 @@ const goodsServices = {
       result[0].brand_info = brandData[0]
 
       //查询相关商品信息
-      // let c_sql = 'select parent_id from goods_category where category_id = ?'
+      let c_sql = 'select parent_id from goods_category where category_id = ?'
+      const [{ parent_id }] = await db.executeQuery(c_sql, [category_id])
       let sqls = 'select category_id from goods_category where parent_id = ?'
-      // const [{ parent_id }] = await db.executeQuery(c_sql, [result[0].category_id])
-      let ids = await db.executeQuery(sqls, [37])
-      // let ids = await db.executeQuery(sqls, [parent_id])
+      let ids = await db.executeQuery(sqls, [parent_id])
       let promise = []
-      let c_sql_ = 'select goods_id,goods_name,goods_price,retail_price,goods_img from goods where category_id = ?'
+      let c_sql_ = 'select goods_id,goods_name,goods_price,retail_price,goods_img from goods where category_id = ? order by rand()'
       ids.forEach(item => promise.push(db.executeQuery(c_sql_, [item.category_id])))
       const aboutGoods = await Promise.all(promise)
       let list = new Array(4).fill().map(() => [])
@@ -43,14 +44,26 @@ const goodsServices = {
       result[0].aboutGoods = list
 
       //查询24小时热销商品信息
-      let h_sql = 'select category_id from goods_category where parent_id = ?'
-      let c_ids = await db.executeQuery(h_sql, [289])
+      //查询热销商品
+      let hot_sql = `SELECT goods_id, SUM(count) AS total_sales
+                    FROM order_goods
+                    GROUP BY goods_id
+                    ORDER BY total_sales DESC;`
+      const hotId = await db.executeQuery(hot_sql)
+
+      const hotArr = hotId.slice(0, limit)  //选出24条记录
       let promises = []
-      c_ids.forEach(item => promises.push(db.executeQuery(c_sql_, [item.category_id])))
+      hotArr.forEach(item => {
+        promises.push(db.executeQuery(sql, [item.goods_id]))
+      })
       const hotGoods = await Promise.all(promises)
       let h_list = new Array(4).fill().map(() => [])
       h_list.forEach((item, index) => item.push(...hotGoods.flat().slice(index * 6, (index + 1) * 6)))
       result[0].hotGoods = h_list
+
+      //获取商品推荐
+      let recommendList = aboutGoods.flat()
+      result[0].recommendList = recommendList
 
       //响应结果
       res.status(200).json({

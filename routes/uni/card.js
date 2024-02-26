@@ -9,5 +9,8 @@ cardRouter.get('/uni/card/change', cardController.updateCardItem)
 
 cardRouter.get('/uni/card', cardController.getCardList)
 
+cardRouter.put('/uni/card', cardController.putCardItems)
+
+cardRouter.post('/uni/card', cardController.updateCardItem)
 
 module.exports = cardRouter

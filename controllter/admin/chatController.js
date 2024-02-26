@@ -6,6 +6,9 @@ const chatController = {
   },
   getUserChat: (req, res) => {
     chatService.getUserChatAPI(req, res)
+  },
+  insertUserChatInfo: (req, res) => {
+    chatService.insertUserChatInfoAPI(req, res)
   }
 }
 

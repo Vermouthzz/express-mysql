@@ -5,8 +5,11 @@ const commentController = {
   getCommentData: (req, res) => {
     commentServices.getCommentList(req, res)
   },
-  putUserComment: (req, res) => {
+  addUserComment: (req, res) => {
     commentServices.addCommentItem(req, res)
+  },
+  getCommentGoods: (req, res) => {
+    commentServices.getCommentGoodsAPI(req, res)
   }
 }
 

@@ -6,6 +6,9 @@ const categoryController = {
   },
   getSubcateList: (req, res) => {
     categoryServices.getSecondCate(req, res)
+  },
+  getGoodsList: (req, res) => {
+    categoryServices.getGoodsListAPI(req, res)
   }
 }
 

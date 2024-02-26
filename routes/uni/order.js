@@ -7,6 +7,6 @@ orderRouter.put('/uni/order', orderController.createOrder)
 orderRouter.delete('/uni/order', orderController.delOrderItem)
 orderRouter.post('/uni/order', orderController.updateOrderItem)
 orderRouter.get('/uni/orders', orderController.getOrderList)
-
+orderRouter.post('/uni/order/create', orderController.getCreateOrder)
 
 module.exports = orderRouter

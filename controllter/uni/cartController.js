@@ -12,6 +12,9 @@ const cartController = {
   },
   updateCart: (req, res) => {
     cartServices.updateCartItem(req, res)
+  },
+  getRecommendList: (req, res) => {
+    cartServices.getRecommendListAPI(req, res)
   }
 }
 

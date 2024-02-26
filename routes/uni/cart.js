@@ -12,5 +12,7 @@ cartRouter.delete('/uni/cart', cartController.delCart)
 //get为获取购物车
 cartRouter.get('/uni/cart', cartController.getCart)
 
+cartRouter.get('/uni/list/cart', cartController.getRecommendList)
+
 
 module.exports = cartRouter

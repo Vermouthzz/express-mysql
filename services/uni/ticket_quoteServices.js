@@ -2,8 +2,9 @@ const db = require('../../config/db.config')
 const cron = require('node-cron')
 
 const ticket_quoteServices = {
+  //用户使用红包逻辑
   updateStatusAPI: async (req, res) => {
-    const { status } = req.body
+    const { status, id } = req.body
     try {
       let sql = 'update user_ticket set ticket_status = ? where user_ticket_id = ?'
       await db.executeQuery(sql, [status, id])

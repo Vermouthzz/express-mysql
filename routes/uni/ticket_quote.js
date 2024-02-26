@@ -9,5 +9,7 @@ ticket_quoteRouter.get('/uni/tickets/sign', ticket_quoteController.getExchangeTi
 //
 ticket_quoteRouter.put('/uni/put/sign', ticket_quoteController.onExchangeRedTicket)
 
+ticket_quoteRouter.put('/uni/ticket', ticket_quoteController.updateTicketStatus)
+
 
 module.exports = ticket_quoteRouter

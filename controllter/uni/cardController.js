@@ -10,6 +10,9 @@ const cardController = {
   updateCardItem: (req, res) => {
     cardServices.updateCardItemAPI(req, res)
   },
+  putCardItems: (req, res) => {
+    cardServices.putCardItemsAPI(req, res)
+  },
   getCardList: (req, res) => {
     cardServices.getCardListAPI(req, res)
   }

@@ -18,7 +18,7 @@ module.exports.verifyToken = function (req, res, next) {
     if (err) {
       return res.json({ code: "403", msg: "token无效" });
     }
-    console.log("verify decoded", decoded);
+    // console.log("verify decoded", decoded);
     req.userinfo = decoded
     next();
   });

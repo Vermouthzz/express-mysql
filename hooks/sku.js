@@ -1,4 +1,4 @@
-const Renames = (item,type = 'guige') => {
+const Renames = (item, type = 'guige') => {
   const Enum = {
     guige: '规格',
     kuanshi: '款式',
@@ -16,16 +16,15 @@ const Renames = (item,type = 'guige') => {
     chicun: '尺寸',
     size: '尺码'
   }
-  if(type == 'guige') {
+  if (type == 'guige') {
     delete item['sp_id']
   }
-  if(type == 'arg') {
+  if (type == 'arg') {
     delete item['goods_id']
     delete item['argument_id']
   }
   type === 'arg' ? obj = Enums : obj = Enum
   for (let key in item) {
-    console.log(key);
     for (let k in obj) {
       if (k == key) {
         //更换属性名
@@ -36,11 +35,11 @@ const Renames = (item,type = 'guige') => {
       }
     }
   }
-  if(type == 'list') {
+  if (type == 'list') {
     return item
   }
   let res = []
-  for(let key in item) {
+  for (let key in item) {
     let o = {
       name: key,
       value: item[key]
@@ -91,8 +90,8 @@ const reFee = (val) => {
     1: '单件包邮',
     2: '满99包邮'
   }
-  for(key in eunm) {
-    if(val == key) {
+  for (key in eunm) {
+    if (val == key) {
       return eunm[key]
     }
   }

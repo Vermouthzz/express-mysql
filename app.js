@@ -6,6 +6,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const auth = require('./utils/auth')
 const fs = require('fs')
+const { nanoid } = require('nanoid')
+
+
 
 
 var indexRouter = require('./routes/index');
@@ -37,28 +40,34 @@ const searchRouter = require('./routes/uni/search');
 const cardRouter = require('./routes/uni/card');
 const ticket_quoteRouter = require('./routes/uni/ticket_quote');
 const integralRouter = require('./routes/uni/integral');
+const chatRouter = require('./routes/uni/chat')
+const rankRouter = require('./routes/uni/rank')
 
 //admin
 const a_goodsRouter = require('./routes/admin/goods')
 const a_loginRouter = require('./routes/admin/login')
 const a_chatRouter = require('./routes/admin/chat')
 const a_userRouter = require('./routes/admin/user')
+const a_ticketRouter = require('./routes/admin/ticket')
 
+//
 const upload = multer({ dest: './public/upload' })
 app.use(upload.any())
 app.use(express.static("./public"))
 
 app.use(cors())
-// app.use('/statics', express.static('statics'));
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')))
+app.use('/public/comment', express.static(path.join(__dirname, 'public/comment')))
 
 //admin
 app.use('/api', a_goodsRouter)
 app.use('/api', a_loginRouter)
+app.use('/api', a_chatRouter)
+app.use('/api', a_ticketRouter)
 
 //uni
 app.use('/', indexRouter);
@@ -67,7 +76,8 @@ app.use('/api', categoryRouter)
 app.use('/api', homeRouter)
 app.use('/api', goodsRouter)
 app.use('/api', searchRouter)
-
+app.use('/api', chatRouter)
+app.use('/api', rankRouter)
 
 app.use('/api/*', auth.verifyToken)
 
@@ -82,12 +92,13 @@ app.use('/api', addressRouter)
 app.use('/api', Userrouter)
 app.use('/api', orderRouter)
 
+
 //admin
-app.use('/api', a_chatRouter)
 app.use('/api', a_userRouter)
 
 //file与小程序中的name参数要一致
 app.post('/api/uni/upload', (req, res) => {
+  console.log(req.userinfo);
   const file = req.files
   const id = req.body.id
   let oldName = file[0].filename
@@ -105,6 +116,41 @@ app.post('/api/uni/upload', (req, res) => {
     }
   })
 })
+
+app.post('/api/uni/comment', async (req, res) => {
+  const file = req.files
+  const user_id = req.userinfo.id
+  const { star, text, date, goods_id, id } = req.body
+  let oldName = file[0].filename
+  let newName = Buffer.from(file[0].originalname, 'latin1').toString('utf-8')
+  fs.renameSync(`./public/upload/${oldName}`, `./public/upload/${newName}`)
+  const img = `http://127.0.0.1:3000/upload/${newName}`
+  try {
+    let comment_id = ''
+    if (id == 'none') {
+      comment_id = nanoid(8)
+      let sql = 'insert into goods_comment(comment_id,user_id,picture,text,date,goods_id,star) values(?,?,?,?,?,?,?)'
+      await db.executeQuery(sql, [comment_id, user_id, img, text, date, goods_id, star])
+
+    } else {
+      comment_id = id
+      let sql = 'update goods_comment set picture = ? where comment_id = ?'
+      let selectSql = 'select picture,comment_id from goods_comment where comment_id = ?'
+      const [data] = await db.executeQuery(selectSql, [comment_id])
+      console.log(data);
+      const picture = `${data.picture},${img}`
+      await db.executeQuery(sql, [picture, comment_id])
+    }
+
+    res.json({
+      msg: 'success',
+      id: comment_id
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error.' })
+  }
+},)
 
 
 

@@ -5,9 +5,9 @@ const searchController = {
   getSearchResultList: (req, res) => {
     searchServices.getSearchResult(req, res)
   },
-  // getSortSearchResultList: (req, res) => {
-  //   searchServices.getSortResult(req, res)
-  // }
+  getHotSearchCate: (req, res) => {
+    searchServices.getHotSearchCateResult(req, res)
+  }
 }
 
 module.exports = searchController
